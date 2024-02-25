@@ -1,1 +1,16 @@
-[]
+[
+    {
+        "1": "Which command is used to list the contents of a directory in Linux?"
+    },
+    {
+        "1": {
+            "a": "ls",
+            "b": "list",
+            "c": "dir",
+            "d": "show"
+        }
+    },
+    {
+        "1": "ls"
+    }
+]

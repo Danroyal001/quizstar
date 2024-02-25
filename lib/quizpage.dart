@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quizstar/resultpage.dart';
 
+import 'package:flutter/services.dart' show rootBundle;
+
 // Renamed class to follow Dart naming conventions
 // ignore: must_be_immutable
 class GetJson extends StatelessWidget {
@@ -38,10 +40,13 @@ class GetJson extends StatelessWidget {
 
     return FutureBuilder<String>(
       future:
-          DefaultAssetBundle.of(context).loadString(assetToLoad, cache: false),
+          // DefaultAssetBundle.of(context).loadString(assetToLoad, cache: false),
+          rootBundle.loadString(assetToLoad, cache: false),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<dynamic> mydata = json.decode(snapshot.data.toString());
+
+          print(mydata);
 
           return QuizPage(mydata: mydata);
         } else if (snapshot.hasError) {
