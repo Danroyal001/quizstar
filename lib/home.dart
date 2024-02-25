@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quizstar/quizpage.dart';
 
-class homepage extends StatefulWidget {
+class HomePage extends StatefulWidget {
   @override
-  _homepageState createState() => _homepageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _homepageState extends State<homepage> {
-
+class _HomePageState extends State<HomePage> {
   List<String> images = [
     "images/py.png",
     "images/java.png",
@@ -25,19 +24,19 @@ class _homepageState extends State<homepage> {
     "Linux is a OPEN SOURCE Operating System which powers many Servers and Workstation.\nIt is also a top Priority in Developement Work !",
   ];
 
-  Widget customcard(String langname, String image, String des){
+  Widget customcard(String langname, String image, String des) {
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: 20.0,
         horizontal: 30.0,
       ),
       child: InkWell(
-        onTap: (){
+        onTap: () {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
             // in changelog 1 we will pass the langname name to ther other widget class
-            // this name will be used to open a particular JSON file 
+            // this name will be used to open a particular JSON file
             // for a particular language
-            builder: (context) => getjson(langname),
+            builder: (context) => GetJson(langname: langname),
           ));
         },
         child: Material(
@@ -85,14 +84,12 @@ class _homepageState extends State<homepage> {
                   child: Text(
                     des,
                     style: TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.white,
-                      fontFamily: "Alike"
-                    ),
+                        fontSize: 18.0,
+                        color: Colors.white,
+                        fontFamily: "Alike"),
                     maxLines: 5,
                     textAlign: TextAlign.justify,
                   ),
-                  
                 ),
               ],
             ),
@@ -104,9 +101,8 @@ class _homepageState extends State<homepage> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitDown, DeviceOrientation.portraitUp
-    ]);
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
     return Scaffold(
       appBar: AppBar(
         title: Text(

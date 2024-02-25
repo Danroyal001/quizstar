@@ -1,230 +1,162 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quizstar/resultpage.dart';
 
-class getjson extends StatelessWidget {
-  // accept the langname as a parameter
+// Renamed class to follow Dart naming conventions
+// ignore: must_be_immutable
+class GetJson extends StatelessWidget {
+  final String langname;
+  GetJson({this.langname = ""});
 
-  String langname;
-  getjson(this.langname);
-  String assettoload;
+  late String assetToLoad;
 
-  // a function
-  // sets the asset to a particular JSON file
-  // and opens the JSON
-  setasset() {
-    if (langname == "Python") {
-      assettoload = "assets/python.json";
-    } else if (langname == "Java") {
-      assettoload = "assets/java.json";
-    } else if (langname == "Javascript") {
-      assettoload = "assets/js.json";
-    } else if (langname == "C++") {
-      assettoload = "assets/cpp.json";
-    } else {
-      assettoload = "assets/linux.json";
+  // Corrected method name to follow Dart conventions
+  void setAsset() {
+    switch (langname) {
+      case "Python":
+        assetToLoad = "python.json";
+        break;
+      case "Java":
+        assetToLoad = "java.json";
+        break;
+      case "Javascript":
+        assetToLoad = "js.json";
+        break;
+      case "C++":
+        assetToLoad = "cpp.json";
+        break;
+      default:
+        assetToLoad = "linux.json";
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // this function is called before the build so that
-    // the string assettoload is avialable to the DefaultAssetBuilder
-    setasset();
-    // and now we return the FutureBuilder to load and decode JSON
-    return FutureBuilder(
+    setAsset(); // Call setAsset before building the widget
+
+    return FutureBuilder<String>(
       future:
-          DefaultAssetBundle.of(context).loadString(assettoload, cache: false),
+          DefaultAssetBundle.of(context).loadString(assetToLoad, cache: false),
       builder: (context, snapshot) {
-        List mydata = json.decode(snapshot.data.toString());
-        if (mydata == null) {
-          return Scaffold(
-            body: Center(
-              child: Text(
-                "Loading",
-              ),
-            ),
-          );
-        } else {
-          return quizpage(mydata: mydata);
+        if (snapshot.hasData) {
+          List<dynamic> mydata = json.decode(snapshot.data.toString());
+
+          return QuizPage(mydata: mydata);
+        } else if (snapshot.hasError) {
+          return Scaffold(body: Center(child: Text("Error loading data")));
         }
+        return Scaffold(body: Center(child: Text("Loading...")));
       },
     );
   }
 }
 
-class quizpage extends StatefulWidget {
-  final List mydata;
+// Renamed class to follow Dart naming conventions
+class QuizPage extends StatefulWidget {
+  final List<dynamic> mydata;
+  QuizPage({required this.mydata});
 
-  quizpage({Key key, @required this.mydata}) : super(key: key);
   @override
-  _quizpageState createState() => _quizpageState(mydata);
+  _QuizPageState createState() => _QuizPageState();
 }
 
-class _quizpageState extends State<quizpage> {
-  final List mydata;
-  _quizpageState(this.mydata);
-
-  Color colortoshow = Colors.indigoAccent;
+class _QuizPageState extends State<QuizPage> {
+  Color colorToShow = Colors.indigoAccent;
   Color right = Colors.green;
   Color wrong = Colors.red;
-  int marks = 0;
-  int i = 1;
+  int marks = 0, i = 1, timer = 30;
   bool disableAnswer = false;
-  // extra varibale to iterate
-  int j = 1;
-  int timer = 30;
-  String showtimer = "30";
-  var random_array;
-
-  Map<String, Color> btncolor = {
+  late List<int> randomArray;
+  Map<String, Color> btnColor = {
     "a": Colors.indigoAccent,
     "b": Colors.indigoAccent,
     "c": Colors.indigoAccent,
     "d": Colors.indigoAccent,
   };
+  bool cancelTimer = false;
 
-  bool canceltimer = false;
+  String showtimer = "30";
 
-  // code inserted for choosing questions randomly
-  // to create the array elements randomly use the dart:math module
-  // -----     CODE TO GENERATE ARRAY RANDOMLY
-
-  genrandomarray(){
-    var distinctIds = [];
-    var rand = new Random();
-      for (int i = 0; ;) {
-      distinctIds.add(rand.nextInt(10));
-        random_array = distinctIds.toSet().toList();
-        if(random_array.length < 10){
-          continue;
-        }else{
-          break;
-        }
-      }
-      print(random_array);
-  }
-
-  //   var random_array;
-  //   var distinctIds = [];
-  //   var rand = new Random();
-  //     for (int i = 0; ;) {
-  //     distinctIds.add(rand.nextInt(10));
-  //       random_array = distinctIds.toSet().toList();
-  //       if(random_array.length < 10){
-  //         continue;
-  //       }else{
-  //         break;
-  //       }
-  //     }
-  //   print(random_array);
-
-  // ----- END OF CODE
-  // var random_array = [1, 6, 7, 2, 4, 10, 8, 3, 9, 5];
-
-  // overriding the initstate function to start timer as this screen is created
   @override
   void initState() {
-    starttimer();
-    genrandomarray();
     super.initState();
+    startTimer();
+    genRandomArray();
   }
 
-  // overriding the setstate function to be called only if mounted
-  @override
-  void setState(fn) {
-    if (mounted) {
-      super.setState(fn);
-    }
+  void genRandomArray() {
+    randomArray = List.generate(10, (index) => index)..shuffle();
   }
 
-  void starttimer() async {
-    const onesec = Duration(seconds: 1);
-    Timer.periodic(onesec, (Timer t) {
-      setState(() {
-        if (timer < 1) {
-          t.cancel();
-          nextquestion();
-        } else if (canceltimer == true) {
-          t.cancel();
-        } else {
-          timer = timer - 1;
-        }
-        showtimer = timer.toString();
-      });
+  void startTimer() {
+    const oneSec = Duration(seconds: 1);
+    Timer.periodic(oneSec, (Timer t) {
+      if (mounted) {
+        setState(() {
+          if (timer < 1) {
+            t.cancel();
+            nextQuestion();
+          } else if (cancelTimer) {
+            t.cancel();
+          } else {
+            timer--;
+          }
+        });
+      }
     });
   }
 
-  void nextquestion() {
-    canceltimer = false;
+  void nextQuestion() {
+    cancelTimer = false;
     timer = 30;
     setState(() {
-      if (j < 10) {
-        i = random_array[j];
-        j++;
+      if (i < randomArray.length) {
+        i = randomArray[i];
+        i++;
       } else {
+        // Navigate to result page
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => resultpage(marks: marks),
+          builder: (context) => ResultPage(marks: marks),
         ));
       }
-      btncolor["a"] = Colors.indigoAccent;
-      btncolor["b"] = Colors.indigoAccent;
-      btncolor["c"] = Colors.indigoAccent;
-      btncolor["d"] = Colors.indigoAccent;
+      btnColor = {
+        "a": Colors.indigoAccent,
+        "b": Colors.indigoAccent,
+        "c": Colors.indigoAccent,
+        "d": Colors.indigoAccent
+      };
       disableAnswer = false;
     });
-    starttimer();
+    startTimer();
   }
 
-  void checkanswer(String k) {
-    
-    // in the previous version this was
-    // mydata[2]["1"] == mydata[1]["1"][k]
-    // which i forgot to change
-    // so nake sure that this is now corrected
-    if (mydata[2][i.toString()] == mydata[1][i.toString()][k]) {
-      // just a print sattement to check the correct working
-      // debugPrint(mydata[2][i.toString()] + " is equal to " + mydata[1][i.toString()][k]);
-      marks = marks + 5;
-      // changing the color variable to be green
-      colortoshow = right;
+  void checkAnswer(String k) {
+    if (widget.mydata[2][i.toString()] == widget.mydata[1][i.toString()][k]) {
+      marks += 5;
+      colorToShow = right;
     } else {
-      // just a print sattement to check the correct working
-      // debugPrint(mydata[2]["1"] + " is equal to " + mydata[1]["1"][k]);
-      colortoshow = wrong;
+      colorToShow = wrong;
     }
     setState(() {
-      // applying the changed color to the particular button that was selected
-      btncolor[k] = colortoshow;
-      canceltimer = true;
+      btnColor[k] = colorToShow;
+      cancelTimer = true;
       disableAnswer = true;
     });
-    // nextquestion();
-    // changed timer duration to 1 second
-    Timer(Duration(seconds: 2), nextquestion);
+    Timer(Duration(seconds: 2), nextQuestion);
   }
 
-  Widget choicebutton(String k) {
+  Widget choiceButton(String k) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: 10.0,
-        horizontal: 20.0,
-      ),
+      padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
       child: MaterialButton(
-        onPressed: () => checkanswer(k),
+        onPressed: () => checkAnswer(k),
         child: Text(
-          mydata[1][i.toString()][k],
-          style: TextStyle(
-            color: Colors.white,
-            fontFamily: "Alike",
-            fontSize: 16.0,
-          ),
-          maxLines: 1,
+          widget.mydata[1][i.toString()][k],
+          style: TextStyle(color: Colors.white, fontSize: 16.0),
         ),
-        color: btncolor[k],
+        color: btnColor[k]!,
         splashColor: Colors.indigo[700],
         highlightColor: Colors.indigo[700],
         minWidth: 200.0,
@@ -237,28 +169,30 @@ class _quizpageState extends State<quizpage> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
     return WillPopScope(
-      onWillPop: () {
-        return showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                  title: Text(
-                    "Quizstar",
-                  ),
-                  content: Text("You Can't Go Back At This Stage."),
-                  actions: <Widget>[
-                    FlatButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        'Ok',
-                      ),
-                    )
-                  ],
-                ));
+      onWillPop: () async {
+        final result = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Quizstar"),
+            content: Text("You Can't Go Back At This Stage."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context)
+                      .pop(true); // Return true when popping the dialog
+                },
+                child: Text('Ok'),
+              ),
+            ],
+          ),
+        );
+
+        return result ?? false; // Return false if dialog is dismissed
       },
       child: Scaffold(
         body: Column(
@@ -269,7 +203,7 @@ class _quizpageState extends State<quizpage> {
                 padding: EdgeInsets.all(15.0),
                 alignment: Alignment.bottomLeft,
                 child: Text(
-                  mydata[0][i.toString()],
+                  widget.mydata[0][i.toString()],
                   style: TextStyle(
                     fontSize: 16.0,
                     fontFamily: "Quando",
@@ -278,22 +212,22 @@ class _quizpageState extends State<quizpage> {
               ),
             ),
             Expanded(
-                flex: 6,
-                child: AbsorbPointer(
-                  absorbing: disableAnswer,
-                    child: Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        choicebutton('a'),
-                        choicebutton('b'),
-                        choicebutton('c'),
-                        choicebutton('d'),
-                      ],
-                    ),
+              flex: 6,
+              child: AbsorbPointer(
+                absorbing: disableAnswer,
+                child: Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      choiceButton('a'),
+                      choiceButton('b'),
+                      choiceButton('c'),
+                      choiceButton('d'),
+                    ],
                   ),
                 ),
               ),
+            ),
             Expanded(
               flex: 1,
               child: Container(

@@ -8,19 +8,18 @@ class splashscreen extends StatefulWidget {
 }
 
 class _splashscreenState extends State<splashscreen> {
-
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    Timer(Duration(seconds: 3), (){
+    Timer(Duration(seconds: 3), () {
       Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => homepage(),
+        builder: (context) => HomePage(),
       ));
     });
   }
 
   // added test yourself
-  // and made the text to align at center 
+  // and made the text to align at center
   @override
   Widget build(BuildContext context) {
     return Scaffold(

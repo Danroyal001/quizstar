@@ -1,33 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:quizstar/home.dart';
 
-class resultpage extends StatefulWidget {
-  int marks;
-  resultpage({Key key , @required this.marks}) : super(key : key);
+class MyWidget extends StatefulWidget {
+  const MyWidget({super.key});
+
   @override
-  _resultpageState createState() => _resultpageState(marks);
+  State<MyWidget> createState() => _MyWidgetState();
 }
 
-class _resultpageState extends State<resultpage> {
+class _MyWidgetState extends State<MyWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
 
+// ignore: must_be_immutable
+class ResultPage extends StatefulWidget {
+  int marks;
+
+  ResultPage({this.marks = 0});
+  @override
+  _ResultPageState createState() => _ResultPageState(marks);
+}
+
+class _ResultPageState extends State<ResultPage> {
   List<String> images = [
     "images/success.png",
     "images/good.png",
     "images/bad.png",
   ];
 
-  String message;
-  String image;
+  String message = "";
+  String image = "";
 
   @override
-  void initState(){
-    if(marks < 20){
+  void initState() {
+    if (marks < 20) {
       image = images[2];
       message = "You Should Try Hard..\n" + "You Scored $marks";
-    }else if(marks < 35){
+    } else if (marks < 35) {
       image = images[1];
       message = "You Can Do Better..\n" + "You Scored $marks";
-    }else{
+    } else {
       image = images[0];
       message = "You Did Very Well..\n" + "You Scored $marks";
     }
@@ -35,7 +50,7 @@ class _resultpageState extends State<resultpage> {
   }
 
   int marks;
-  _resultpageState(this.marks);
+  _ResultPageState(this.marks);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,34 +82,34 @@ class _resultpageState extends State<resultpage> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 5.0,
-                        horizontal: 15.0,
-                      ),
-                      child: Center(
-                      child: Text(
-                        message,
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontFamily: "Quando",
+                        padding: EdgeInsets.symmetric(
+                          vertical: 5.0,
+                          horizontal: 15.0,
                         ),
-                      ),
-                    )
-                    ),
+                        child: Center(
+                          child: Text(
+                            message,
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontFamily: "Quando",
+                            ),
+                          ),
+                        )),
                   ],
                 ),
               ),
-            ),            
+            ),
           ),
           Expanded(
             flex: 4,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                OutlineButton(
-                  onPressed: (){
+                OutlinedButton(
+                  onPressed: () {
                     Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) => homepage(),
+                      builder: (context) =>
+                          HomePage(), // Ensure HomePage is correctly named and exists
                     ));
                   },
                   child: Text(
@@ -103,12 +118,15 @@ class _resultpageState extends State<resultpage> {
                       fontSize: 18.0,
                     ),
                   ),
-                  padding: EdgeInsets.symmetric(
-                    vertical: 10.0,
-                    horizontal: 25.0,
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 10.0,
+                      horizontal: 25.0,
+                    ),
+                    side: BorderSide(
+                        width: 3.0, color: Colors.indigo), // Border side
+                    splashFactory: InkRipple.splashFactory, // For splash effect
                   ),
-                  borderSide: BorderSide(width: 3.0, color: Colors.indigo),
-                  splashColor: Colors.indigoAccent,
                 )
               ],
             ),
